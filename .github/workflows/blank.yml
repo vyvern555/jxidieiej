@@ -16,8 +16,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.5
-      - run: gradle assembleDebug --no-daemon
+      - name: Build
+        shell: bash
         working-directory: AIPhotoEnhancer_fixsrc
+        run: gradle assembleDebug --no-daemon --console=plain 2>&1 | tee build.log
+      - name: Show errors
+        if: failure()
+        working-directory: AIPhotoEnhancer_fixsrc
+        run: grep '^e: ' build.log | head -15 | while IFS= read -r l; do echo "::error::$l"; done
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug
